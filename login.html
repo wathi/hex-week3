@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Style CSS -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <!-- Vue3 -->
+  <script src="https://unpkg.com/vue@next"></script>
+
+  <title>Online Bus Tour</title></head>
+<body>
+  <div id="login" class="container">
+    <div id="admin-login" class="flex flex-direction-column align-items-center">
+      <h3 class="text-center mb-2">登入</h3>
+      <div class="error-msg text-center mb-2" v-if="errMsg">{{errMsg}}</div>
+      <form class="flex flex-direction-column">
+          <label for="username">用戶名</label>
+          <input id="username" class="mb-2 p-05" name="username" type="email" v-model="logginUser.username">
+          <label for="password">密碼</label>
+          <input id="password" class="mb-2 p-05" name="password" type="password" v-model="logginUser.password">
+          <button id="submit-login" class="p-05" type="button" @click="authLogin">登入</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="login.js"></script>
+
+</body>
+</html>
