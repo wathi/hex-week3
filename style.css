@@ -132,3 +132,9 @@ th,td {
   font-size: 2rem;
   cursor: pointer;
 }
+
+.error-msg {
+  color: rgb(128, 59, 59);
+  background-color: rgb(255, 174, 174);
+  width: 100%;
+}

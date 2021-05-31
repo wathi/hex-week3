@@ -9,10 +9,7 @@ const admin = Vue.createApp({
       isLoggedIn: false,
       addProductFormShow: false,
       editProductFormShow: false,
-      logginUser:{},
       emptyUser:{
-        username: "",
-        password: ""
       },
       tempProduct:{},
       emptyProduct:{
@@ -27,54 +24,28 @@ const admin = Vue.createApp({
         unit: "",
         num: 0,
         imageUrl : "",
-      }
+      },
+      errMsg:[],
     }
   },
   methods: {
-    checkLogin: function(){
-      let token = document.cookie.replace`(/(?:(?:^|.*;\s*)OnlineBusTour\s*\=\s*([^;]*).*$)|^.*$/, "$1")`;
-      axios.defaults.headers.common['Authorization'] = token;
-    
+    checkLogin: function(){ 
       axios.post(`${this.apiUrl}/api/user/check`)
       .then((res) => {
         if(res.data.success){
             console.log(res.data);
-            console.log("check success");
-            this.isLoggedIn = true;
+            this.getProductAdmin();
         } else {
           console.log(res.data);
-          console.log("check fail");
-          this.isLoggedIn = false;
         };
       })
       .catch((err) => {
         console.log(err);
       });
     },
-    showAdminLogin: function(){
-    },
-    authLogin: function(){
-      console.log("authloggin", this.logginUser)
-      axios.post(`${this.apiUrl}/admin/signin`, this.logginUser)
-      .then((res) => {
-        console.log(res.data);
-        if(res.data.success){
-          document.cookie = `OnlineBusTour=${res.data.token}; expires=${new Date(res.data.expired)}`;
-          this.isLoggedIn = true;
-          this.getProductAdmin();
-          console.log("login success")
-        } 
-        if(!res.data.success) {
-          this.isLoggedIn = false;
-          console.log("login fail")
-        }
-      })
-      .catch((err) => {
-        console.log(err.response.data);
-      });
-    },
     getProductAdmin: function(){
-      axios.get(`${this.apiUrl}/api/${this.apiPath}/products/all`)
+      this.products = [];
+      axios.get(`${this.apiUrl}/api/${this.apiPath}/admin/products`)
       .then((res) => {
           console.log(res.data.products)
           res.data.products.forEach((product) => {
@@ -84,8 +55,7 @@ const admin = Vue.createApp({
       })
       .catch((err) => {
         console.log(err.response.data);
-        this.error();
-      
+        this.error();      
       });
     },
     showAddProductForm: function(){
@@ -94,11 +64,8 @@ const admin = Vue.createApp({
     },
     hideAddProductForm: function(){
       this.addProductFormShow = false;
-      this.tempProduct = {};
     },
     addProduct: function(){
-      this.tokenToHeader();
-
 			axios.post(`${this.apiUrl}/api/${this.apiPath}/admin/product`, {
 				data: {
 					title: this.tempProduct.title, 
@@ -112,9 +79,15 @@ const admin = Vue.createApp({
 				}
 			})
 			.then((res) => {
-				console.log(res);
-				this.tempProduct = {};
-        this.hideAddProductForm();
+        if(res.data.success){
+          this.tempProduct = {};
+          this.hideAddProductForm();
+          this.getProductAdmin();  
+        }else{
+          res.data.message.forEach((msg)=>{
+            this.errMsg.push(msg)
+          })
+        }
 			})
 			.catch((err) => {
 				console.log(err.response.data);
@@ -128,7 +101,7 @@ const admin = Vue.createApp({
       })
       this.editProductFormShow = true;
     },
-    clearEditProductForm(){
+    hideEditProductForm(){
       this.tempProduct = {};
       this.editProductFormShow = false;
     },
@@ -147,49 +120,54 @@ const admin = Vue.createApp({
 				}
 			})
 			.then((res) => {
-				console.log(res);
-				this.tempProduct = {};
-        this.hideEditProductForm();
+        if(res.data.success){
+          console.log(res);
+          this.tempProduct = {};
+          this.hideEditProductForm();  
+          this.getProductAdmin();
+        }else{
+          res.data.message.forEach((msg)=>{
+            this.errMsg.push(msg)
+          })
+        }
 			})
 			.catch((err) => {
 				console.log(JSON.stringify(err))
 			});
     },
-
     deleteProduct: function(productid){
-      this.tokenToHeader();
 			console.log("delete product: ", productid)
 			axios.delete(`${this.apiUrl}/api/${this.apiPath}/admin/product/${productid}`)
 			.then((res) => {
-				console.log(res.data);
+        console.log(res.data);
+        if(res.data.success){
+          this.getProductAdmin();
+        }else{
+          console.log(res.data);
+        }
 			})
 			.catch((err) => {
 				console.log(err.response.data);
 			});
     },
-    adminLogout: function (){
-			axios.post(`${this.apiUrl}/logout/`)
-			.then((res) => {
-				console.log(res.data)
-				if(res.data.success){
-          document.cookie = `OnlineBusTour = ; expires = ${new Date()}`;
-				}
-			})
-			.catch((err) => {
-				console.log(err.response.data);
-			});
-    },
-    tokenToHeader: function(){
-      let token = document.cookie.replace`(/(?:(?:^|.*;\s*)OnlineBusTour\s*\=\s*([^;]*).*$)|^.*$/, "$1")`;
-      axios.defaults.headers.common['Authorization'] = token;
-    },
-    render: function(){
-      this.isLoggedIn = true;
-    },
+    // adminLogout: function (){
+		// 	axios.post(`${this.apiUrl}/logout/`)
+		// 	.then((res) => {
+		// 		console.log(res.data)
+		// 		if(res.data.success){
+    //       document.cookie = `OnlineBusTour = ; expires = ${new Date()}`;
+		// 		}
+		// 	})
+		// 	.catch((err) => {
+		// 		console.log(err.response.data);
+		// 	});
+    // },
   },
-  created(){
+  mounted(){
+    let token = document.cookie.replace(/(?:(?:^|.*;\s*)OnlineBusTour\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    axios.defaults.headers.common['Authorization'] = token;
+
     this.checkLogin();
-    // this.render();
   }
 })
 
