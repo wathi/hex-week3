@@ -64,6 +64,7 @@ const admin = Vue.createApp({
     },
     hideAddProductForm: function(){
       this.addProductFormShow = false;
+	this.errMsg=[];
     },
     addProduct: function(){
 			axios.post(`${this.apiUrl}/api/${this.apiPath}/admin/product`, {
@@ -103,6 +104,7 @@ const admin = Vue.createApp({
     },
     hideEditProductForm(){
       this.tempProduct = {};
+	    this.errMsg=[];
       this.editProductFormShow = false;
     },
     editProduct: function(){
